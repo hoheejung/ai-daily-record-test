@@ -10,7 +10,7 @@ load_dotenv()
 
 # 상수 설정
 STYLE_FILE_PATH = os.path.join("data", "style_reference.txt")
-DAILY_LIMIT = 50  # 하루 최대 생성 횟수 제한
+DAILY_LIMIT = 100  # 하루 최대 생성 횟수 제한
 
 # 페이지 설정
 st.set_page_config(page_title="햇살 어린이집 AI 알림장", page_icon="📝")
