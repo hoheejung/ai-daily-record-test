@@ -13,7 +13,7 @@ STYLE_FILE_PATH = os.path.join("data", "style_reference.txt")
 DAILY_LIMIT = 300  # 하루 최대 생성 횟수 제한
 
 # 페이지 설정
-st.set_page_config(page_title="햇살 어린이집 AI 알림장", page_icon="📝")
+st.set_page_config(page_title="어린이집 AI 알림장", page_icon="📝")
 
 # --- 안전장치: 하루 사용량 제한 (메모리 캐시 활용) ---
 @st.cache_resource
