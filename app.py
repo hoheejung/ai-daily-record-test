@@ -3,15 +3,45 @@ import google.generativeai as genai
 from PIL import Image
 import os
 from dotenv import load_dotenv
+import datetime
 
 # 환경 변수 로드
 load_dotenv()
 
 # 상수 설정
 STYLE_FILE_PATH = os.path.join("data", "style_reference.txt")
+DAILY_LIMIT = 50  # 하루 최대 생성 횟수 제한
 
 # 페이지 설정
 st.set_page_config(page_title="햇살 어린이집 AI 알림장", page_icon="📝")
+
+# --- 안전장치 1: 접속 코드 (비밀번호) ---
+# .env에서 코드를 가져오거나, 없으면 기본값 '1234' (로컬 테스트용)
+ACCESS_CODE = os.getenv("ACCESS_CODE", "1234")
+
+st.sidebar.title("🔐 보안 접속")
+input_code = st.sidebar.text_input("접속 코드를 입력하세요", type="password")
+
+if input_code != ACCESS_CODE:
+    st.sidebar.error("코드가 일치하지 않습니다.")
+    st.warning("⚠️ 이 앱은 승인된 사용자만 이용할 수 있습니다. 관리자에게 받은 접속 코드를 입력해주세요.")
+    st.stop()  # 코드가 틀리면 여기서 앱 실행 중단
+
+# --- 안전장치 2: 하루 사용량 제한 (메모리 캐시 활용) ---
+@st.cache_resource
+def get_usage_counter():
+    # 서버 메모리에 사용량 저장 (날짜, 횟수)
+    return {"date": datetime.date.today(), "count": 0}
+
+usage_data = get_usage_counter()
+
+# 날짜가 바뀌었으면 카운트 초기화
+if usage_data["date"] != datetime.date.today():
+    usage_data["date"] = datetime.date.today()
+    usage_data["count"] = 0
+
+# 현재 사용량 표시 (관리자 확인용 - 실제 배포 시에는 숨겨도 됨)
+st.sidebar.markdown(f"📊 **오늘 생성 횟수:** {usage_data['count']} / {DAILY_LIMIT}")
 
 # Gemini API 설정
 api_key = os.getenv("GOOGLE_API_KEY", "")
@@ -87,6 +117,8 @@ if st.button("✨ 알림장 생성"):
         st.error("활동 사진을 최소 한 장 이상 업로드해주세요.")
     elif not keywords:
         st.error("키워드를 입력해주세요.")
+    elif usage_data["count"] >= DAILY_LIMIT:
+        st.error(f"죄송합니다. 😢 오늘의 무료 생성 한도({DAILY_LIMIT}회)가 모두 소진되었습니다.\n내일 다시 이용해주세요.")
     else:
         with st.spinner("선생님의 마음을 담아 알림장을 작성하고 있어요..."):
             try:
@@ -127,6 +159,9 @@ if st.button("✨ 알림장 생성"):
                 # content 리스트에 프롬프트와 이미지 객체들을 모두 넣습니다.
                 content = [prompt] + images
                 response = model.generate_content(content)
+                
+                # 사용량 카운트 증가
+                usage_data["count"] += 1
                 
                 # 결과 출력
                 st.success("따뜻한 알림장이 완성되었습니다!")
