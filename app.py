@@ -10,24 +10,12 @@ load_dotenv()
 
 # 상수 설정
 STYLE_FILE_PATH = os.path.join("data", "style_reference.txt")
-DAILY_LIMIT = 100  # 하루 최대 생성 횟수 제한
+DAILY_LIMIT = 300  # 하루 최대 생성 횟수 제한
 
 # 페이지 설정
 st.set_page_config(page_title="햇살 어린이집 AI 알림장", page_icon="📝")
 
-# --- 안전장치 1: 접속 코드 (비밀번호) ---
-# .env에서 코드를 가져오거나, 없으면 기본값 '1234' (로컬 테스트용)
-ACCESS_CODE = os.getenv("ACCESS_CODE", "1234")
-
-st.sidebar.title("🔐 보안 접속")
-input_code = st.sidebar.text_input("접속 코드를 입력하세요", type="password")
-
-if input_code != ACCESS_CODE:
-    st.sidebar.error("코드가 일치하지 않습니다.")
-    st.warning("⚠️ 이 앱은 승인된 사용자만 이용할 수 있습니다. 관리자에게 받은 접속 코드를 입력해주세요.")
-    st.stop()  # 코드가 틀리면 여기서 앱 실행 중단
-
-# --- 안전장치 2: 하루 사용량 제한 (메모리 캐시 활용) ---
+# --- 안전장치: 하루 사용량 제한 (메모리 캐시 활용) ---
 @st.cache_resource
 def get_usage_counter():
     # 서버 메모리에 사용량 저장 (날짜, 횟수)
