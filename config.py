@@ -3,7 +3,7 @@ import os
 # --- 설정 상수 ---
 DAILY_LIMIT = 100
 STYLE_FILE_PATH = os.path.join("data", "style_reference.txt")
-PAGE_TITLE = "우리선생님 AI"
+PAGE_TITLE = "우리선생님 문서도우미"
 PAGE_ICON = "☀️"
 MODEL_NAME = 'gemini-2.5-flash'
 
